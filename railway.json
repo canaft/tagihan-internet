@@ -1,0 +1,7 @@
+{
+  "nixpacks": {
+    "php": {
+      "version": "8.3"
+    }
+  }
+}
