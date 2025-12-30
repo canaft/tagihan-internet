@@ -4,8 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Http\Request;
-use App\Models\Pengaduan;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,23 +14,17 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // ✅ Paksa HTTPS di production
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }
 
-        // ✅ PENTING: percaya proxy Railway
-        Request::setTrustedProxies(
-            ['*'],
-            Request::HEADER_X_FORWARDED_FOR |
-            Request::HEADER_X_FORWARDED_HOST |
-            Request::HEADER_X_FORWARDED_PORT |
-            Request::HEADER_X_FORWARDED_PROTO
-        );
-
-        // Badge jumlah pengaduan
         view()->composer('*', function ($view) {
-            $jumlahPengaduanBaru = Pengaduan::where('status', 'baru')->count();
+            try {
+                $jumlahPengaduanBaru = \App\Models\Pengaduan::where('status', 'baru')->count();
+            } catch (\Throwable $e) {
+                $jumlahPengaduanBaru = 0;
+            }
+
             $view->with('jumlahPengaduanBaru', $jumlahPengaduanBaru);
         });
     }
