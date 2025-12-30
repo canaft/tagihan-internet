@@ -3,32 +3,37 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Models\Tagihan;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Http\Request;
 use App\Models\Pengaduan;
 
-use App\Observers\TagihanObserver;
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
+    public function boot(): void
+    {
+        // ✅ Paksa HTTPS di production
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
 
-public function boot()
-{
-    view()->composer('*', function ($view) {
-        // Ambil pengaduan yang statusnya "baru"
-        $jumlahPengaduanBaru = Pengaduan::where('status', 'baru')->count();
+        // ✅ PENTING: percaya proxy Railway
+        Request::setTrustedProxies(
+            ['*'],
+            Request::HEADER_X_FORWARDED_FOR |
+            Request::HEADER_X_FORWARDED_HOST |
+            Request::HEADER_X_FORWARDED_PORT |
+            Request::HEADER_X_FORWARDED_PROTO
+        );
 
-        $view->with('jumlahPengaduanBaru', $jumlahPengaduanBaru);
-    });
-}
-
+        // Badge jumlah pengaduan
+        view()->composer('*', function ($view) {
+            $jumlahPengaduanBaru = Pengaduan::where('status', 'baru')->count();
+            $view->with('jumlahPengaduanBaru', $jumlahPengaduanBaru);
+        });
+    }
 }

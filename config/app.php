@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+'url' => 'https://tagihan-internet-production.up.railway.app',
 
     /*
     |--------------------------------------------------------------------------
